@@ -36,7 +36,7 @@ async def add_image_to_lecture_preparation(callback: CallbackQuery, state: FSMCo
     )
     await state.set_state(CreateLecture.add_image_to_lecture)
 
-@router.message(CreateLecture.add_image_to_lecture)
+@router.message(CreateLecture.add_image_to_lecture, F.media_group_id, F.content_type.in_({'photo'}))
 @media_group_handler
 async def add_image_to_lecture_preparation(messages: List[Message], state: FSMContext):
     count_images = 0
@@ -59,7 +59,7 @@ async def add_image_to_lecture_preparation(messages: List[Message], state: FSMCo
         reply_markup=done_button_kb
     )
 
-@router.message(CreateLecture.sending_images)
+@router.message(CreateLecture.add_image_to_lecture)
 async def sending_photos_processing(message: Message, state: FSMContext):
     print(message.photo[-1].file_id)
     photo_file_id = message.photo[-1].file_id

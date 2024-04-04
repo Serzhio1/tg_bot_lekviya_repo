@@ -1,7 +1,6 @@
 from aiogram import Router, Bot
 from aiogram.types import CallbackQuery, InputMediaPhoto
 from aiogram.fsm.context import FSMContext
-from aiogram_media_group import media_group_handler
 
 from keyboards.list_notepads_keyboard import ChooseNotepadCD
 from keyboards.list_lectures_keyboard import get_list_lectures
@@ -11,6 +10,7 @@ from keyboards.actions_after_add_creation_lecture_keyboard import actions_after_
 from database.db import session_factory
 from database.models.lecture_image import LectureImageORM
 from database.models.notepad import NotepadORM
+from database.models.lecture import LectureORM
 from sqlalchemy.orm import selectinload
 from sqlalchemy import select
 
@@ -29,7 +29,7 @@ async def choose_lecture_processing(callback: CallbackQuery, callback_data: Choo
         notepad = result.scalar()
         notepad_title = notepad.title
         await state.update_data(notepad_title=notepad_title)
-    await state.update_data(notepad_uuid=notepad_uuid)
+        await state.update_data(notepad_uuid=notepad_uuid)
 
     if count_lectures > 0:
         await callback.message.edit_text(
@@ -48,16 +48,21 @@ async def choose_lecture_processing(callback: CallbackQuery, callback_data: Choo
 async def open_lecture_processing(callback: CallbackQuery, callback_data: ChooseLectureCD, state: FSMContext, bot: Bot):
     lecture_id = callback_data.id
     await state.update_data(lecture_id=lecture_id)
-    data = await state.get_data()
     chat_id = callback.message.chat.id
     there_is_lections = False
+
     async with session_factory() as session:
+        lecture_title_query = select(LectureORM).filter(LectureORM.id == lecture_id)
+        lecture_title_result = (await session.execute(lecture_title_query)).scalar()
+        lecture_title = lecture_title_result.title
+
+        await state.update_data(lecture_title=lecture_title)
+        data = await state.get_data()
+
         query = select(LectureImageORM).options(selectinload(LectureImageORM.lecture)).filter(LectureImageORM.lecture_id == lecture_id)
         result = (await session.execute(query)).unique().scalars().all()
         if result:
             there_is_lections = True
-            lecture_title = result[0].lecture.title
-            await state.update_data(lecture_title=lecture_title)
 
             count_all_images = 0
             count_images_for_album = 0
@@ -82,13 +87,11 @@ async def open_lecture_processing(callback: CallbackQuery, callback_data: Choose
                 lecture_images.append(input_media_photo)
                 if count_images_for_album == 10:
                     await bot.send_media_group(chat_id=chat_id, media=lecture_images)
-                    #await callback.message.edit_reply_markup(None)
                     count_images_for_album = 0
                     lecture_images = []
             if lecture_images:
                 await bot.send_media_group(chat_id=chat_id, media=lecture_images)
-                #await callback.message.edit_reply_markup(None)
-
+    await callback.message.edit_reply_markup(None)
     await sleep(0.5)
     if there_is_lections:
         await callback.message.answer(

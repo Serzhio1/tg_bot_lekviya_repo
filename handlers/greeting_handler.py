@@ -39,6 +39,20 @@ async def start_processing(message: Message, state: FSMContext):
 
 @router.message(F.text=="/help")
 async def help_information(message: Message):
+
+    user_id = message.from_user.id
+    async with session_factory() as session:
+        query = select(UserORM).filter(UserORM.tg_id == user_id)
+        result = await session.execute(query)
+        user = result.scalar()
+        if not user:
+            new_user = UserORM(
+                tg_id=user_id,
+                join_date=datetime.utcnow()
+            )
+            session.add(new_user)
+            await session.commit()
+
     await message.answer(
         text=(
             f"🤓 <b>Это справочная информация по работе с «Леквией»</b>\n\n"

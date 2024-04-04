@@ -58,16 +58,15 @@ async def finish_lecture_creating(callback: CallbackQuery, state: FSMContext, bo
                 lecture_images.append(input_media_photo)
                 if count_images_for_album == 10:
                     await bot.send_media_group(chat_id=chat_id, media=lecture_images)
-                    #await callback.message.edit_reply_markup(None)
                     count_images_for_album = 0
                     lecture_images = []
             if lecture_images:
                 await bot.send_media_group(chat_id=chat_id, media=lecture_images)
-                #await callback.message.edit_reply_markup(None)
+    await callback.message.edit_reply_markup(None)
     await sleep(0.5)
     await callback.message.answer(
         text=(
-            f"🫡 <b>Отлично! Лекция «{data.get('lecture_title')}» была успешно сохранена в блокнот «{data.get('notepad_title')}»</b>.\n"
+            f"🤩 <b>Отлично! Лекция «{data.get('lecture_title')}» была успешно сохранена в блокнот «{data.get('notepad_title')}»</b>.\n"
             f"😉 <b>Не забудь переслать эту лекцию своим друзьям)\n\n</b>"
             "<b>Выбери следующее действие:</b>"
         ),
@@ -100,7 +99,7 @@ async def instructions_adding_photos(message: Message, state: FSMContext):
         if input_data[0].isdigit():
             valid_input_data = False
             await message.answer(
-                text="🙈 <b>Название лекции нужно ввести обязательно, а вот номер - необязательно.\n\n Попробуй еще раз)</b>",
+                text="🙈 <b>Название лекции нужно ввести обязательно, а вот номер - нет.\n\nПопробуй еще раз)</b>",
                 parse_mode="HTML"
             )
         else:

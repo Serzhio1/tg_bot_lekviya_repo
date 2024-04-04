@@ -8,6 +8,7 @@ from keyboards.cancel_button_keyboard import cancel_button_kb
 
 from database.db import session_factory
 from database.models.notepad import NotepadORM
+from sqlalchemy import select, and_
 
 from tools import get_uuid
 from states import CreateNotepad
@@ -32,27 +33,39 @@ async def actions_after_creation_notepad(message: Message, state: FSMContext):
     await state.update_data(notepad_title=message.text)
     data = await state.get_data()
     user_id = message.from_user.id
+    there_is_notepad = False
 
     async with session_factory() as session:
-        notepad_uuid = str(get_uuid())
-        await state.update_data(notepad_uuid=notepad_uuid)
-        new_notepad = NotepadORM(
-            id=notepad_uuid,
-            title=data.get('notepad_title'),
-            user_tg_id=user_id
-        )
-        session.add(new_notepad)
-        await session.commit()
+
+        query = select(NotepadORM).filter(and_(NotepadORM.user_tg_id == user_id, NotepadORM.title == data.get("notepad_title")))
+        result = (await session.execute(query)).unique().scalars().first()
+        if result:
+            await message.answer(
+                text="<b>👽 У тебя уже есть блокнот с таким названием.\n\nПопробуй еще раз)</b>",
+                parse_mode="HTML"
+            )
+            there_is_notepad = True
+
+        if not there_is_notepad:
+            notepad_uuid = str(get_uuid())
+            await state.update_data(notepad_uuid=notepad_uuid)
+            new_notepad = NotepadORM(
+                id=notepad_uuid,
+                title=data.get('notepad_title'),
+                user_tg_id=user_id
+            )
+            session.add(new_notepad)
+            await session.commit()
 
 
-    await message.answer(
-        text=(
-            f"😊 <b>Отлично, блокнот «{data.get('notepad_title')}» создан!</b>\n\n"
-            "<b>Выбери следующее действие:</b>"
-        ),
-        parse_mode="HTML",
-        reply_markup=actions_after_creation_notepad_kb
-    )
+            await message.answer(
+                text=(
+                    f"😊 <b>Отлично, блокнот «{data.get('notepad_title')}» создан!</b>\n\n"
+                    "<b>Выбери следующее действие:</b>"
+                ),
+                parse_mode="HTML",
+                reply_markup=actions_after_creation_notepad_kb
+            )
 
 
 

@@ -25,7 +25,7 @@ async def get_list_lectures(notepad_uuid):
                     callback_data=ChooseLectureCD(id=lecture_id).pack()
                 )]
             )
-        list_lecture_buttons.append([InlineKeyboardButton(text="Добавить лекцию в этот блокнот", callback_data="add_lecture_button")])
-        list_lecture_buttons.append([InlineKeyboardButton(text="Вернуться в меню", callback_data="return_to_menu_button")])
+        list_lecture_buttons.append([InlineKeyboardButton(text="📔 Добавить лекцию в этот блокнот", callback_data="add_lecture_button")])
+        list_lecture_buttons.append([InlineKeyboardButton(text="🏠 Вернуться в меню", callback_data="return_to_menu_button")])
         list_lecture_kb = InlineKeyboardMarkup(inline_keyboard=list_lecture_buttons)
     return list_lecture_kb, count_lectures

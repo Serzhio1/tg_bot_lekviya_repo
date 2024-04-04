@@ -26,6 +26,6 @@ async def get_list_notepads(user_id):
                     callback_data=ChooseNotepadCD(uuid=notepad_uuid).pack()
                 )]
             )
-        list_notepads_buttons.append([InlineKeyboardButton(text="Вернуться в меню", callback_data="return_to_menu_button")])
+        list_notepads_buttons.append([InlineKeyboardButton(text="🏠 Вернуться в меню", callback_data="return_to_menu_button")])
         list_notepads_kb = InlineKeyboardMarkup(inline_keyboard=list_notepads_buttons)
     return list_notepads_kb, count_notepads
