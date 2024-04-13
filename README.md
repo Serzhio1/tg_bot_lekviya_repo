@@ -10,5 +10,7 @@
 3. ORM «SqlAlchemy»
 4. Администрирование с использованием Linux дистрибутива - «Ubuntu» 
 
-## Ссылка на бота: 
-[@serzhio_lekviya_bot](https://t.me/serzhio_lekviya_bot)
+## Ссылки: 
+• [«Леквия» в Telegram](https://t.me/serzhio_lekviya_bot)
+
+• [Я в Telegram](https://t.me/SergeyMakhov111)
